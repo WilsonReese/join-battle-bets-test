@@ -43,7 +43,7 @@
     <p class="warn"><small>If you don’t have the app, you’ll be sent to the App Store.</small></p>
   </div>
 
-  <script>
+  <!-- <script>
     (function () {
       const params = new URLSearchParams(location.search);
       const poolId = params.get('pool_id') || '';
@@ -105,6 +105,33 @@
 
       // Secondary: give users a manual universal-link path to /join
       safariBtn.href = ulJoin;
+    })();
+  </script> -->
+
+  <script>
+    (function () {
+      const p = new URLSearchParams(location.search);
+      const pool = p.get('pool_id') || '';
+      const tok  = p.get('token')   || '';
+
+      // Always hand off to /join (the app knows this route)
+      const universalJoin = `https://join.battlebets.app/join?pool_id=${encodeURIComponent(pool)}&token=${encodeURIComponent(tok)}`;
+
+      const ua = navigator.userAgent.toLowerCase();
+      const hostile = ua.includes('instagram') || ua.includes('snapchat') || ua.includes('fbav') || ua.includes('fbios') || ua.includes('tiktok');
+
+      // Button wiring:
+      document.getElementById('openAppBtn').onclick = function (e) {
+        e.preventDefault();
+        // Use a user gesture to jump to the associated domain (Universal Link)
+        location.href = universalJoin;
+      };
+
+      if (hostile) {
+        document.getElementById('openSafariBtn').style.display = '';
+        document.getElementById('openSafariBtn').href = universalJoin;
+        document.getElementById('webviewHelp').style.display = '';
+      }
     })();
   </script>
 </body>
