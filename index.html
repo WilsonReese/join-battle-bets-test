@@ -5,7 +5,7 @@
   <title>Join my Battle Bets League</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-  <!-- Keep the same preview as /join so thumbnails don't change -->
+  <!-- Keep the same rich preview as /join so thumbnails don't change -->
   <meta property="og:type"        content="website" />
   <meta property="og:title"       content="Join my Battle Bets League!" />
   <meta property="og:description" content="The world's first app for simulated sports betting leagues. Fake money. Real fun." />
@@ -22,8 +22,7 @@
     .btn { display:block; text-align:center; padding:14px 16px; border-radius:12px; text-decoration:none; font-weight:600; margin:12px 0 }
     .btn-primary { background:#3bd17f; color:#0b1420 }
     .btn-ghost { background:transparent; border:1px solid #3bd17f; color:#3bd17f }
-    .warn { background:#2b3a52; padding:10px 12px; border-radius:10px; margin-top:12px; font-size:14px; opacity:.95 }
-    small { opacity:.8 }
+    .muted { opacity:.8; font-size:14px }
   </style>
 </head>
 <body>
@@ -31,107 +30,44 @@
     <h1>Open Battle Bets</h1>
     <p>We’ll open the app with your invite.</p>
 
-    <!-- Visible actions -->
-    <a id="openAppBtn" class="btn btn-primary" href="#">Open Battle Bets</a>
-    <a id="openSafariBtn" class="btn btn-ghost" href="#" style="display:none" rel="noopener" target="_top">Open in Safari</a>
+    <a id="openBtn" class="btn btn-primary" href="#">Open Battle Bets</a>
+    <a id="downloadBtn" class="btn btn-ghost" href="#">Download Battle Bets</a>
 
-    <div class="warn" id="webviewHelp" style="display:none">
-      Looks like you opened this inside another app (Instagram/Snapchat/etc).
-      These webviews block deep links. Tap <b>Open in Safari</b>, then tap <b>Open Battle Bets</b>.
-    </div>
-
-    <p class="warn"><small>If you don’t have the app, you’ll be sent to the App Store.</small></p>
+    <p class="muted">If you don’t have the app, the App Store will open.</p>
   </div>
 
-  <!-- <script>
+  <script>
     (function () {
       const params = new URLSearchParams(location.search);
       const poolId = params.get('pool_id') || '';
       const token  = params.get('token')  || '';
 
-      // Your already-working /join universal link (do not change)
-      const ulJoin = `https://join.battlebets.app/join?pool_id=${encodeURIComponent(poolId)}&token=${encodeURIComponent(token)}`;
+      // This is the Universal Link your app already handles (on associated domain)
+      const UNIVERSAL_JOIN = `https://join.battlebets.app/join?pool_id=${encodeURIComponent(poolId)}&token=${encodeURIComponent(token)}`;
 
-      // Custom scheme (works great in Safari/Chrome; blocked in IG/SC webviews)
-      const scheme = `battlebets://join?pool_id=${encodeURIComponent(poolId)}&token=${encodeURIComponent(token)}`;
+      // Store & fallback URLs
+      const APP_STORE = 'https://apps.apple.com/us/app/battle-bets/id6738606749';
+      const SITE_FALLBACK = 'https://battlebets.app';
 
-      const appStoreURL = 'https://apps.apple.com/us/app/battle-bets/id6738606749';
-
-      // Detect hostile webviews
-      const ua = navigator.userAgent.toLowerCase();
-      const inIG   = ua.includes('instagram');
-      const inSC   = ua.includes('snapchat');
-      const inFB   = ua.includes('fbav') || ua.includes('fbios');
-      const inTik  = ua.includes('tiktok');
-      const hostile = inIG || inSC || inFB || inTik;
-
-      const openBtn   = document.getElementById('openAppBtn');
-      const safariBtn = document.getElementById('openSafariBtn');
-      const help      = document.getElementById('webviewHelp');
-
-      // 1) Hostile webviews: DO NOT auto-open; show "Open in Safari" → points to /join
-      if (hostile) {
-        help.style.display = '';
-        safariBtn.style.display = '';
-        safariBtn.href = ulJoin; // preserves params, and /join already works
-        // Also make primary button go to /join (some users will tap it)
-        openBtn.href = ulJoin;
-        return;
-      }
-
-      // 2) Normal browsers (Safari/Chrome from SMS): mimic your current /join behavior
-      //    Try custom scheme immediately; fallback to App Store if app doesn't foreground.
-      function tryOpenApp() {
-        const t = Date.now();
-        // Attempt custom scheme
-        window.location.href = scheme;
-
-        // Fallback after ~1.2s if still on page (app likely not installed)
-        setTimeout(function () {
-          if (!document.hidden && Date.now() - t > 1100) {
-            window.location.href = appStoreURL;
-          }
-        }, 1200);
-      }
-
-      // Auto-try on load (matches current /join "instant open" flow)
-      tryOpenApp();
-
-      // Primary button: also try again on user tap
-      openBtn.addEventListener('click', function (e) {
+      // OPEN: Send to the Universal Link. iOS hands off to the app if installed.
+      // If the app isn't installed, Safari will just load /join again (expected).
+      // We keep this button clean—no extra fallbacks—since you’ve got a dedicated Download button.
+      document.getElementById('openBtn').onclick = function (e) {
         e.preventDefault();
-        tryOpenApp();
-      });
-
-      // Secondary: give users a manual universal-link path to /join
-      safariBtn.href = ulJoin;
-    })();
-  </script> -->
-
-  <script>
-    (function () {
-      const p = new URLSearchParams(location.search);
-      const pool = p.get('pool_id') || '';
-      const tok  = p.get('token')   || '';
-
-      // Always hand off to /join (the app knows this route)
-      const universalJoin = `https://join.battlebets.app/join?pool_id=${encodeURIComponent(pool)}&token=${encodeURIComponent(tok)}`;
-
-      const ua = navigator.userAgent.toLowerCase();
-      const hostile = ua.includes('instagram') || ua.includes('snapchat') || ua.includes('fbav') || ua.includes('fbios') || ua.includes('tiktok');
-
-      // Button wiring:
-      document.getElementById('openAppBtn').onclick = function (e) {
-        e.preventDefault();
-        // Use a user gesture to jump to the associated domain (Universal Link)
-        location.href = universalJoin;
+        location.href = UNIVERSAL_JOIN;
       };
 
-      if (hostile) {
-        document.getElementById('openSafariBtn').style.display = '';
-        document.getElementById('openSafariBtn').href = universalJoin;
-        document.getElementById('webviewHelp').style.display = '';
-      }
+      // DOWNLOAD: Try App Store; if it doesn't foreground, fall back to website.
+      document.getElementById('downloadBtn').onclick = function (e) {
+        e.preventDefault();
+        const t = Date.now();
+        location.href = APP_STORE;
+        setTimeout(() => {
+          if (!document.hidden && Date.now() - t > 1100) {
+            location.href = SITE_FALLBACK;
+          }
+        }, 1200);
+      };
     })();
   </script>
 </body>
