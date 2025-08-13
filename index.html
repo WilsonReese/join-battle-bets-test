@@ -5,12 +5,12 @@
   <title>Join my Battle Bets League</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-  <!-- Keep the same rich preview as /join so thumbnails don't change -->
-  <meta property="og:type"        content="website" />
-  <meta property="og:title"       content="Join my Battle Bets League!" />
+  <!-- Keep preview identical to your current /join -->
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Join my Battle Bets League!" />
   <meta property="og:description" content="The world's first app for simulated sports betting leagues. Fake money. Real fun." />
-  <meta property="og:image"       content="https://cdn.prod.website-files.com/6797de532bc3b2461a7039ff/6889824bd4161c300cd7753b_social-sharing.png" />
-  <meta property="og:url"         content="https://join.battlebets.app/join" />
+  <meta property="og:image" content="https://cdn.prod.website-files.com/6797de532bc3b2461a7039ff/6889824bd4161c300cd7753b_social-sharing.png" />
+  <meta property="og:url" content="https://join.battlebets.app/join" />
   <meta name="robots" content="noindex" />
 
   <style>
@@ -42,29 +42,37 @@
       const poolId = params.get('pool_id') || '';
       const token  = params.get('token')  || '';
 
-      // This is the Universal Link your app already handles (on associated domain)
-      const UNIVERSAL_JOIN = `https://join.battlebets.app/join?pool_id=${encodeURIComponent(poolId)}&token=${encodeURIComponent(token)}`;
+      // 1) Open the app via custom scheme that your app already handles: path = "join"
+      const SCHEME_JOIN = `battlebets://join?pool_id=${encodeURIComponent(poolId)}&token=${encodeURIComponent(token)}`;
 
-      // Store & fallback URLs
+      // 2) Store URL + fallback if store is blocked
       const APP_STORE = 'https://apps.apple.com/us/app/battle-bets/id6738606749';
       const SITE_FALLBACK = 'https://battlebets.app';
 
-      // OPEN: Send to the Universal Link. iOS hands off to the app if installed.
-      // If the app isn't installed, Safari will just load /join again (expected).
-      // We keep this button clean—no extra fallbacks—since you’ve got a dedicated Download button.
+      // Open: try scheme, then App Store fallback if the app doesn't foreground
       document.getElementById('openBtn').onclick = function (e) {
         e.preventDefault();
-        location.href = UNIVERSAL_JOIN;
+        const t = Date.now();
+
+        // Attempt to open the app
+        window.location.href = SCHEME_JOIN;
+
+        // If the page is still visible after ~1.2s, assume app didn't open -> App Store
+        setTimeout(function () {
+          if (!document.hidden && Date.now() - t > 1100) {
+            window.location.href = APP_STORE;
+          }
+        }, 1200);
       };
 
-      // DOWNLOAD: Try App Store; if it doesn't foreground, fall back to website.
+      // Download: direct to App Store; if Store is blocked, fall back to website
       document.getElementById('downloadBtn').onclick = function (e) {
         e.preventDefault();
         const t = Date.now();
-        location.href = APP_STORE;
-        setTimeout(() => {
+        window.location.href = APP_STORE;
+        setTimeout(function () {
           if (!document.hidden && Date.now() - t > 1100) {
-            location.href = SITE_FALLBACK;
+            window.location.href = SITE_FALLBACK;
           }
         }, 1200);
       };
