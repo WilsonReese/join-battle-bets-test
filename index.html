@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Join my Battle Bets League</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <!-- Keep the same rich link preview as /join so thumbnails don’t change -->
+  <meta property="og:type"        content="website" />
+  <meta property="og:title"       content="Join my Battle Bets League!" />
+  <meta property="og:description" content="The world's first app for simulated sports betting leagues. Fake money. Real fun." />
+  <meta property="og:image"       content="https://cdn.prod.website-files.com/6797de532bc3b2461a7039ff/6889824bd4161c300cd7753b_social-sharing.png" />
+  <meta property="og:url"         content="https://join.battlebets.app/join" />
+  <meta name="robots" content="noindex" />
+
+  <style>
+    :root { color-scheme: dark light; }
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; background:#0b1420; color:#fff; margin:0; min-height:100dvh; display:grid; place-items:center; padding:24px; }
+    .card { width:100%; max-width:560px; padding:24px; background:#132235; border-radius:16px; box-shadow:0 10px 30px rgba(0,0,0,.25) }
+    h1 { margin:0 0 8px }
+    p { margin:8px 0 }
+    .btn { display:block; text-align:center; padding:14px 16px; border-radius:12px; text-decoration:none; font-weight:600; margin:12px 0 }
+    .btn-primary { background:#3bd17f; color:#0b1420 }
+    .btn-ghost { background:transparent; border:1px solid #3bd17f; color:#3bd17f }
+    .warn { background:#2b3a52; padding:10px 12px; border-radius:10px; margin-top:12px; font-size:14px; opacity:.95 }
+    small { opacity:.8 }
+    code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>Open Battle Bets</h1>
+    <p>We’ll open the app with your invite.</p>
+
+    <a id="openApp" class="btn btn-primary" href="#">Open Battle Bets</a>
+    <a id="openSafari" class="btn btn-ghost" href="#" style="display:none" rel="noopener" target="_top">Open in Safari</a>
+
+    <div class="warn" id="webviewHelp" style="display:none">
+      It looks like you opened this inside another app (Instagram/Snapchat/Facebook).
+      Universal Links are often blocked here. Tap <b>Open in Safari</b>, then tap <b>Open Battle Bets</b>.
+    </div>
+
+    <p class="warn"><small>If you don’t have the app, you’ll be sent to the App Store.</small></p>
+    <p><small>Trouble? Copy link, paste in Safari: <code>join.battlebets.app/join-test?pool_id=…&token=…</code></small></p>
+  </div>
+
+  <script>
+    (function () {
+      const params = new URLSearchParams(location.search);
+      const poolId = params.get('pool_id') || '';
+      const token  = params.get('token')  || '';
+
+      // Persist params so a second hop can reconstruct if needed
+      try {
+        localStorage.setItem('bb_invite_params', JSON.stringify({ pool_id: poolId, token }));
+      } catch (_) {}
+
+      // Universal Link target (your existing join page that works via AASA)
+      const universalHref = `https://join.battlebets.app/join?pool_id=${encodeURIComponent(poolId)}&token=${encodeURIComponent(token)}`;
+      const appStoreURL   = 'https://apps.apple.com/us/app/battle-bets/id6738606749';
+
+      // Basic hostile webview detection
+      const ua = navigator.userAgent.toLowerCase();
+      const inIG  = ua.includes('instagram');
+      const inSC  = ua.includes('snapchat');
+      const inFB  = ua.includes('fbav') || ua.includes('fbios');
+      const inTikTok = ua.includes('tiktok');
+
+      const openBtn   = document.getElementById('openApp');
+      const safariBtn = document.getElementById('openSafari');
+      const help      = document.getElementById('webviewHelp');
+
+      // Primary: try the universal link (hands off to app if installed)
+      openBtn.href = universalHref;
+
+      // If inside a webview, show guidance + Safari option that preserves params
+      if (inIG || inSC || inFB || inTikTok) {
+        help.style.display = '';
+        safariBtn.style.display = '';
+        safariBtn.href = universalHref;
+      }
+
+      // App-store fallback after user-initiated click if the app didn't foreground
+      openBtn.addEventListener('click', function () {
+        const started = Date.now();
+        setTimeout(() => {
+          // If the page is still visible after ~1.2s, assume app did not open
+          if (!document.hidden && Date.now() - started > 1100) {
+            location.href = appStoreURL;
+          }
+        }, 1200);
+      });
+    })();
+  </script>
+</body>
+</html>
