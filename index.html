@@ -42,37 +42,26 @@
       const poolId = params.get('pool_id') || '';
       const token  = params.get('token')  || '';
 
-      // 1) Open the app via custom scheme that your app already handles: path = "join"
-      const SCHEME_JOIN = `battlebets://join?pool_id=${poolId}&token=${token}`;;
+      // Use the UL your app already handles:
+      const SCHEME_JOIN = `battlebets:///join?pool_id=${encodeURIComponent(poolId)}&token=${encodeURIComponent(token)}`;
 
-      // 2) Store URL + fallback if store is blocked
-      const APP_STORE = 'https://apps.apple.com/us/app/battle-bets/id6738606749';
+      const APP_STORE     = 'https://apps.apple.com/us/app/battle-bets/id6738606749';
       const SITE_FALLBACK = 'https://battlebets.app';
 
-      // Open: try scheme, then App Store fallback if the app doesn't foreground
+      // Open: send to the Universal Link (no extra scheme attempt)
       document.getElementById('openBtn').onclick = function (e) {
         e.preventDefault();
-        const t = Date.now();
-
-        // Attempt to open the app
-        window.location.href = SCHEME_JOIN;
-
-        // If the page is still visible after ~1.2s, assume app didn't open -> App Store
-        setTimeout(function () {
-          if (!document.hidden && Date.now() - t > 1100) {
-            window.location.href = APP_STORE;
-          }
-        }, 1200);
+        location.href = UNIVERSAL_JOIN;
       };
 
-      // Download: direct to App Store; if Store is blocked, fall back to website
+      // Download: App Store with fallback
       document.getElementById('downloadBtn').onclick = function (e) {
         e.preventDefault();
         const t = Date.now();
-        window.location.href = APP_STORE;
-        setTimeout(function () {
+        location.href = APP_STORE;
+        setTimeout(() => {
           if (!document.hidden && Date.now() - t > 1100) {
-            window.location.href = SITE_FALLBACK;
+            location.href = SITE_FALLBACK;
           }
         }, 1200);
       };
