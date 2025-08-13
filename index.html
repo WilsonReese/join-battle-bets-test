@@ -43,7 +43,7 @@
       const token  = params.get('token')  || '';
 
       // 1) Open the app via custom scheme that your app already handles: path = "join"
-      const SCHEME_JOIN = `battlebets://join?pool_id=${encodeURIComponent(poolId)}&token=${encodeURIComponent(token)}`;
+      const SCHEME_JOIN = `battlebets://join?pool_id=${poolId}&token=${token}`;;
 
       // 2) Store URL + fallback if store is blocked
       const APP_STORE = 'https://apps.apple.com/us/app/battle-bets/id6738606749';
